@@ -24,27 +24,31 @@ public class Cart
         CustomerId = customerId;
     }
 
-    public void AddItem(CartItem item)
+    public void AddItem(Product product, int quantity)
     {
         if (Status != CartStatus.Active)
         {
             throw new InvalidOperationException("Cannot add items to a cart that is not active.");
         }
-        
-        if (item.CartId != Id)
-        {
-            throw new InvalidOperationException("Item does not belong to this cart.");
-        }
 
-        var existingItem = Items.FirstOrDefault(i => i.ProductId == item.ProductId);
+        // if (quantity <= 0)
+        // {
+        //     throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+        // }
+
+        var existingItem = _items.FirstOrDefault(i => i.ProductId == product.Id);
         if (existingItem != null)
         {
-            existingItem.IncreaseQuantity(item.Quantity);
+            existingItem.IncreaseQuantity(quantity);
         }
         else
         {
-            _items.Add(item);
+            var newItem = new CartItem(Guid.NewGuid(), Id, product.Id, quantity);
+            _items.Add(newItem);
         }
     }
   
-}
+}       
+        
+    
+  
