@@ -1,0 +1,11 @@
+# Claude / AI assistant files
+.claude/
+CLAUDE.md
+.smallbrain/
+
+# OS
+.DS_Store
+
+# Editor swap files
+*.swp
+*.swo
