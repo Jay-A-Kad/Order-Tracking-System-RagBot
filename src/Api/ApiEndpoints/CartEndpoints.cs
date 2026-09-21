@@ -11,6 +11,31 @@ public static class CartEndpoints
     public static void MapCartEndpoint(this WebApplication app)
     {
 
+        //view cart
+        app.MapGet("/customers/{customerId}/cart", async (Guid customerId, AppDbContext dbContext) =>
+        {
+
+            var getCustomer = await dbContext.Customers.FindAsync(customerId);
+            if(getCustomer is null) return Results.NotFound();
+
+            var cart = await dbContext.Carts
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(x => x.CustomerId == customerId && x.Status == CartStatus.Active);
+
+            if(cart is null)
+            {
+                return Results.NotFound();
+            }
+
+            var viewItems =  cart.Items.Select(x =>
+                new CartItemResponse(x.ProductId, x.Quantity))
+                .ToList();
+
+            return Results.Ok(new CartResponse(cart.Id, cart.Status.ToString(), viewItems));
+
+        });
+
+        //create cart 
         app.MapPost("/customers/{customerId}/cart/items", async (Guid customerId, AddCartItemsRequest request, AppDbContext dbContext) =>
         {
             var customer = await dbContext.Customers.FindAsync(customerId);
@@ -22,7 +47,7 @@ public static class CartEndpoints
             var cart = await dbContext.Carts
                 .Include(c => c.Items)
                 .FirstOrDefaultAsync(x => x.CustomerId == customerId && x.Status == CartStatus.Active);
-                
+
             if(cart is null)
             {
                 cart  = new Cart(Guid.NewGuid(), customerId);
