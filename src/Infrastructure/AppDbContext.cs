@@ -41,6 +41,11 @@ public class AppDbContext : DbContext
             .Property(p => p.Price)
             .HasPrecision(18, 2);
 
+        //fixed: cartItem.id is not db generated
+        modelBuilder.Entity<CartItem>()
+            .Property(x => x.Id)
+            .ValueGeneratedNever();
+
     }
 
 
