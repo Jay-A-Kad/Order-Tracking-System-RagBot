@@ -1,4 +1,4 @@
-using OrderTracking.Api.Dtos;
+using OrderTracking.Api.Dtos.Response;
 using OrderTracking.Domain;
 using OrderTracking.Infrastructure;
 

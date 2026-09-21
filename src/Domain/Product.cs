@@ -16,6 +16,24 @@ public class Product
 
     public Product(Guid id, string sku, string name, decimal price, int stockQuantity)
     {
+        if(string.IsNullOrWhiteSpace(sku))
+        {
+            throw new ArgumentException("sku cannot be empty", nameof(sku));
+        }
+        if(string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("name cannot be empty",nameof(name));
+        }
+        if(price < 0)
+        {
+            throw new ArgumentException("price cannot be negative", nameof(price));
+        }
+        if(stockQuantity < 0)
+        {
+            throw new ArgumentException("stock quantity cannot be negative", nameof(stockQuantity));
+        }
+
+
         Id = id;
         Sku = sku;
         Name = name;
