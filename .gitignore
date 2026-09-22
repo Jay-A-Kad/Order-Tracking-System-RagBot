@@ -9,3 +9,8 @@ CLAUDE.md
 # Editor swap files
 *.swp
 *.swo
+
+# .NET build artifacts
+bin/
+obj/
+*.user
