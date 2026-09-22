@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+
 namespace OrderTracking.Domain;
 
 public class Product

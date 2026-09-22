@@ -15,4 +15,7 @@
   <Folder Name="/src/Worker/">
     <Project Path="src/Worker/OrderTracking.Worker.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OrderTracking.UnitTests/OrderTracking.UnitTests.csproj" />
+  </Folder>
 </Solution>
