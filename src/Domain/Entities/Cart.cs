@@ -1,13 +1,5 @@
 namespace OrderTracking.Domain;
 
-
-public enum CartStatus
-{
-    Active,
-    CheckedOut,
-    Abandoned
-}
-
 public class Cart
 {
     public Guid Id { get; private set; }
