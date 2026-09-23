@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using OrderTracking.Domain;
 
@@ -15,10 +16,13 @@ public class AppDbContext : DbContext
     public DbSet<Customer> Customers{get;set;}
     public DbSet<Product> Products{get;set;}
     public DbSet<Cart> Carts{get;set;}
+    public DbSet<Order> Orders{get;set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        //BELOW ARE CART AND CART ITEMS RELATIONSHIPS
+
         //cart items is one directional
         modelBuilder.Entity<Cart>()
             .HasMany(c => c.Items)
@@ -45,6 +49,76 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<CartItem>()
             .Property(x => x.Id)
             .ValueGeneratedNever();
+
+        
+
+        //BELOW ARE ORDER SHIPMENT RELATIONSHIPS
+
+        //order config and relationship
+        modelBuilder.Entity<Order>()
+            .HasMany(o => o.Items)
+            .WithOne()
+            .HasForeignKey(oi => oi.OrderId);
+
+
+         //order status history config and relationship
+        modelBuilder.Entity<Order>()
+            .HasMany(o => o.History)
+            .WithOne()
+            .HasForeignKey(oi => oi.OrderId);
+
+        //shipment propery config and relationship
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.Shipment)
+            .WithOne()
+            .HasForeignKey<Shipment>(s => s.OrderId);
+        
+
+        //order item config and relationship
+        modelBuilder.Entity<OrderItem>()
+            .HasOne<Product>()
+            .WithMany()
+            .HasForeignKey(ci => ci.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+
+        //properties for above relationships
+
+         modelBuilder.Entity<Order>()
+            .Navigation(x => x.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+
+        modelBuilder.Entity<Order>()
+            .Navigation(x => x.History)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);    
+
+        modelBuilder.Entity<OrderItem>()
+        .Property(x => x.Id)
+            .ValueGeneratedNever();
+
+        modelBuilder.Entity<OrderStatusHistory>()
+        .Property(x => x.Id)
+            .ValueGeneratedNever();
+
+        modelBuilder.Entity<Shipment>()
+            .Property(x => x.Id)
+            .ValueGeneratedNever();
+
+
+        modelBuilder.Entity<Order>()
+            .Property(x => x.TotalAmount)
+            .HasPrecision(18, 2);
+    
+        modelBuilder.Entity<OrderItem>()
+            .Property(x => x.UnitPrice)
+            .HasPrecision(18, 2);
+
+            
+       
+
+        
+        
 
     }
 

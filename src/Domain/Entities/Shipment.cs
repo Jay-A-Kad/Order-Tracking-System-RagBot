@@ -12,7 +12,7 @@ public class Shipment
     public DateTime EstimatedDelivery { get; private set; } = DateTime.UtcNow;
 
 
-    public Shipment(Guid id, Guid orderId, string carrier, string trackingNumber, DateTime estimate)
+    public Shipment(Guid id, Guid orderId, string carrier, string trackingNumber, DateTime estimatedDelivery)
     {
         if (string.IsNullOrWhiteSpace(carrier))
         {
@@ -25,15 +25,15 @@ public class Shipment
             throw new ArgumentException("Tracking number cannot be null", nameof(trackingNumber));
         }
 
-        if(estimate <= DateTime.UtcNow)
+        if(estimatedDelivery <= DateTime.UtcNow)
         {
-            throw new ArgumentException("Date cannot be less than current date", nameof(estimate));
+            throw new ArgumentException("Date cannot be less than current date", nameof(estimatedDelivery));
         }
 
         Id = id;
         OrderId = orderId;
         Carrier = carrier;
         TrackingNumber = trackingNumber;
-        EstimatedDelivery = estimate;
+        EstimatedDelivery = estimatedDelivery;
     }
 }
