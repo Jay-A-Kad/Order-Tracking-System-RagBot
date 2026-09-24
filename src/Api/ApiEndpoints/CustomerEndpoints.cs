@@ -93,7 +93,6 @@ public static class CustomerEndpoints
 
             return Results.Created($"/customers/{customerId}/checkout", new OrderResponse( currentOrder.Id, currentOrder.Status.ToString(), currentOrder.TotalAmount, orderItems));
         });
-        
 
     }
 }
