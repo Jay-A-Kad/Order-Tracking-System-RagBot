@@ -1,3 +1,5 @@
+using System;
+
 namespace OrderTracking.Domain;
 
 public class Cart
@@ -38,6 +40,25 @@ public class Cart
             var newItem = new CartItem(Guid.NewGuid(), Id, product.Id, quantity);
             _items.Add(newItem);
         }
+    }
+
+
+    //checkout cart with guards
+
+    public void CheckOut()
+    {
+        if(Status != CartStatus.Active)
+        {
+            throw new InvalidOperationException("Cannot checkout a cart that has been abandoned or checked out");
+        }
+
+        if(_items.Count == 0)
+        {
+            throw new InvalidOperationException("Cannot checkout an empty cart.");
+        }
+
+        Status = CartStatus.CheckedOut;
+    
     }
   
 }       
