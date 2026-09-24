@@ -11,6 +11,7 @@ public class Order
     public decimal TotalAmount { get; private set; }
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
     public OrderStatus Status { get; private set; } = OrderStatus.Placed;
+    public DateTime LastStatusChangedAt {get; private set;} = DateTime.UtcNow;
 
     //order items
     private readonly List<OrderItem> _items = new();
@@ -82,6 +83,7 @@ public class Order
         }
 
         Status = OrderStatus.Cancelled;
+        LastStatusChangedAt = DateTime.UtcNow;
 
          _history.Add(new OrderStatusHistory(
                 Guid.NewGuid(),
@@ -104,6 +106,8 @@ public class Order
         }
 
         Status = OrderStatus.Processing;
+        LastStatusChangedAt = DateTime.UtcNow;
+
         _history.Add(new OrderStatusHistory(
                 Guid.NewGuid(),
                 Id,
@@ -122,6 +126,7 @@ public class Order
         }
 
         Status = OrderStatus.Shipped;
+        LastStatusChangedAt = DateTime.UtcNow;
 
         //fresh shipement construcuted
 
@@ -154,6 +159,8 @@ public class Order
         }
 
         Status = OrderStatus.OutForDelivery;
+        LastStatusChangedAt = DateTime.UtcNow;
+
         _history.Add(new OrderStatusHistory(
                 Guid.NewGuid(),
                 Id,
@@ -172,6 +179,8 @@ public class Order
         }
 
         Status = OrderStatus.Delivered;
+        LastStatusChangedAt = DateTime.UtcNow;
+
         _history.Add(new OrderStatusHistory(
                 Guid.NewGuid(),
                 Id,
