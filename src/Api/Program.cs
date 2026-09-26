@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OrderTracking.Api.ApiEndpoints;
 using OrderTracking.Infrastructure;
+using OrderTracking.Worker;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddOpenApi();
 //app db context
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppDb")));
+
+//worker services
+builder.Services.AddHostedService<ShipmentSimulatorService>();
 
 var app = builder.Build();
 
