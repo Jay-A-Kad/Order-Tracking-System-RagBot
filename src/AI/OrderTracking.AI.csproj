@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\OrderTracking.Domain.csproj" />
+    <ProjectReference Include="..\Infrastructure\OrderTracking.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.80.1" />
   </ItemGroup>
 
   <PropertyGroup>

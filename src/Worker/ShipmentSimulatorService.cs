@@ -111,12 +111,7 @@ public class ShipmentSimulatorService : BackgroundService
                     }
                 }
 
-             
-          
-
-           
-
-
+            
         }
     }
 }
