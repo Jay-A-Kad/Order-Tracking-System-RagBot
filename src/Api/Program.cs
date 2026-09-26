@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using OrderTracking.Api.ApiEndpoints;
 using OrderTracking.Infrastructure;
 using OrderTracking.Worker;
+using Microsoft.SemanticKernel;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //worker services
 builder.Services.AddHostedService<ShipmentSimulatorService>();
 
+//AI services
+builder.Services.AddKernel()
+    .AddAzureOpenAIChatCompletion(
+        deploymentName: builder.Configuration["AzureOpenAI:ChatDeployment"]!,
+        endpoint: builder.Configuration["AzureOpenAI:Endpoint"]!,
+        apiKey: builder.Configuration["AzureOpenAI:ApiKey"]!);
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,5 +39,6 @@ app.MapCustomerEndpoints();
 app.MapProductEndpoints();
 app.MapCartEndpoint();
 app.MapOrderEndpoints();
+app.MapToChatEndpoint();
 
 app.Run();
