@@ -2,8 +2,10 @@
 using Azure;
 using Azure.Search.Documents.Indexes;
 using Azure.Search.Documents.Indexes.Models;
-using System.Numerics;
-using Microsoft.Win32.SafeHandles;
+using Microsoft.SemanticKernel;
+using Microsoft.Extensions.AI;
+using Azure.Search.Documents;
+using System.Security.Cryptography;
 
 
 var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
@@ -17,6 +19,21 @@ string[] filePath = Directory.GetFiles(Path.Combine(currentDir, "src/AI/PolicyDo
 
 //chunking dictionary
 var chunkDictionary = new Dictionary<string,string>();
+
+//emeddings generator
+string embeddingDeploymentName = config["AzureOpenAI:EmbeddingDeployment"]!;
+string openAiEndpoint = config["AzureOpenAI:Endpoint"]!;
+string openAiApiKey = config["AzureOpenAI:ApiKey"]!;
+
+#pragma warning disable SKEXP0010
+var embeddingKernel = Kernel.CreateBuilder()
+      .AddAzureOpenAIEmbeddingGenerator(embeddingDeploymentName, openAiEndpoint, openAiApiKey)
+      .Build();
+#pragma warning restore SKEXP0010
+
+//pull the embed gen services from kernel
+var embeddingGenerator = embeddingKernel.GetRequiredService<IEmbeddingGenerator<string, Embedding<float>>>();
+
 
 
 
@@ -100,10 +117,60 @@ var searchIndex = new SearchIndex("policy-docs-index")
     VectorSearch = vectorSearch
 };
 
+
+
 await indexClient.CreateOrUpdateIndexAsync(searchIndex);
 Console.WriteLine("Index created or updated successfully");
 
 
+//embedding generation using the chunklist
+
+var chunkContent = chunkList.Select(x => x.Content).ToList();
+
+
+var embeddings = await embeddingGenerator.GenerateAsync(chunkContent);
+
+Console.WriteLine($"count: {embeddings.Count} : Name : {embeddings.GetType().Name}");
+
+
+
+
+//build search document
+List<PolicyDocument> policyDoc =  new List<PolicyDocument>();
+
+//made id using sha256
+static string GetFileSha256(string f_path)
+    {
+        using var sha256 = SHA256.Create();
+        
+        byte[] hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(f_path));
+        return Convert.ToHexString(hashBytes);
+            
+        
+    }
+
+
+for(int i=0 ; i < chunkList.Count; i++)
+{
+        string hash = GetFileSha256(chunkList[i].SourceDocument + chunkList[i].Heading);
+        policyDoc.Add(new PolicyDocument(hash, chunkList[i].SourceDocument, chunkList[i].Heading,chunkList[i].Content, embeddings[i].Vector.ToArray()));
+}
+
+
+var searchClient = new SearchClient(new Uri(searchEndpoint), "policy-docs-index", new 
+    AzureKeyCredential(searchAdminKey));
+
+var uploadResult = await searchClient.UploadDocumentsAsync(policyDoc);
+ foreach (var result in uploadResult.Value.Results)
+  {
+      if (!result.Succeeded)
+      {
+          Console.WriteLine($"FAILED: {result.Key} - {result.ErrorMessage}");
+      }
+  }
+var count = await searchClient.GetDocumentCountAsync();
+Console.WriteLine($"Index now contains {count.Value} documents.");
+Console.WriteLine("Documents uploaded successfully");
 
 
 
@@ -111,3 +178,8 @@ Console.WriteLine("Index created or updated successfully");
 
 //chunking response record
 public record PolicyChunk(string SourceDocument, string Heading, string Content);
+
+//document record shape
+public record PolicyDocument(string Id, string sourceDocument, string Heading, string Content, float[] ContentVector);
+
+
