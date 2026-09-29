@@ -8,6 +8,7 @@ using Azure.Search.Documents;
 using System.Security.Cryptography;
 
 
+
 var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
 
 //get azure credentials
