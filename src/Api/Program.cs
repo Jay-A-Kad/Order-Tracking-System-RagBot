@@ -8,6 +8,8 @@ using System.Net;
 using Azure;
 using Azure.Search.Documents;
 using Serilog;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
+using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,15 @@ builder.Services.AddKernel()
       new Uri(builder.Configuration["AzureSearch:Endpoint"]!),
       "policy-docs-index",
       new AzureKeyCredential(builder.Configuration["AzureSearch:AdminKey"]!)));
+
+
+//opentelementary services
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("OrderTracking.Api"))
+    .UseAzureMonitor(options => 
+    {
+        options.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"];
+    });
 
 var app = builder.Build();
 
